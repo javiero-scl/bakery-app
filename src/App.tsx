@@ -1,25 +1,45 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { useSession } from '@supabase/auth-helpers-react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Layout from './components/Layout';
+import Products from './pages/Products';
+import RawMaterials from './pages/RawMaterials';
+import Recipes from './pages/Recipes';
+import Sales from './pages/Sales';
+import Purchases from './pages/Purchases';
+import Productions from './pages/Productions';
+import Users from './pages/Users';
+import Roles from './pages/Roles';
+import UserRoles from './pages/UserRoles';
+import Units from './pages/Units';
+import { Toaster } from 'react-hot-toast';
+import Login from './pages/Login';
 
 function App() {
+  const session = useSession();
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Toaster position="top-center" reverseOrder={false} />
+      <Routes>
+        <Route path="/login" element={!session ? <Login /> : <Navigate to="/products" />} />
+
+        <Route element={session ? <Layout /> : <Navigate to="/login" />}>
+          <Route path="/" element={<Navigate to="/products" replace />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/raw-materials" element={<RawMaterials />} />
+          <Route path="/recipes" element={<Recipes />} />
+          <Route path="/units" element={<Units />} />
+          {/* Placeholder routes for now */}
+          <Route path="/productions" element={<Productions />} />
+          <Route path="/purchases" element={<Purchases />} />
+          <Route path="/sales" element={<Sales />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/roles" element={<Roles />} />
+          <Route path="/user-roles" element={<UserRoles />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
