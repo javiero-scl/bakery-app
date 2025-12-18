@@ -1,23 +1,69 @@
-# Getting Started with Create React App
+# Bakery App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Aplicación de gestión para pastelería construida con React, TypeScript y Supabase.
 
-## Available Scripts
+## Características
 
-In the project directory, you can run:
+- Gestión de productos, materias primas, recetas, producciones, compras, ventas
+- Sistema de usuarios y roles
+- Mantenedor de unidades de medida
+- Separación de cantidad y unidad en recetas
 
-### `npm start`
+## Instalación y Desarrollo
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. Clona el repositorio:
+   ```bash
+   git clone https://github.com/javiero-scl/bakery-app.git
+   cd bakery-app
+   ```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+2. Instala dependencias:
+   ```bash
+   npm install
+   ```
 
-### `npm test`
+3. Configura variables de entorno:
+   - Copia `.env.example` a `.env.local`
+   - Completa con tus credenciales de Supabase
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+4. Ejecuta en desarrollo:
+   ```bash
+   npm start
+   ```
+
+## Deploy
+
+### Opción 1: Vercel (Recomendado)
+
+1. Conecta tu repo de GitHub a [Vercel](https://vercel.com)
+2. Configura las variables de entorno en Vercel:
+   - `REACT_APP_SUPABASE_URL`
+   - `REACT_APP_SUPABASE_ANON_KEY`
+3. Deploy automático en cada push a main
+
+### Opción 2: Netlify
+
+1. Conecta el repo a [Netlify](https://netlify.com)
+2. Configura build settings:
+   - Build command: `npm run build`
+   - Publish directory: `build`
+3. Agrega variables de entorno en Netlify
+
+### Opción 3: Manual
+
+```bash
+npm run build
+# Sube el contenido de la carpeta `build` a tu servidor web
+```
+
+## Tecnologías
+
+- React 18
+- TypeScript
+- Supabase (Backend as a Service)
+- React Router
+- React Hot Toast
+- CSS Modules
 
 ### `npm run build`
 
