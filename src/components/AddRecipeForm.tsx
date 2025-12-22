@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
 import { Database } from '../types/supabase';
@@ -26,11 +26,7 @@ const AddRecipeForm = ({ onRecipeAdded }: AddRecipeFormProps) => {
     const [requiredQuantity, setRequiredQuantity] = useState<number | ''>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        fetchOptions();
-    }, []);
-
-    async function fetchOptions() {
+    const fetchOptions = useCallback(async () => {
         try {
             const { data: productsData } = await supabase.from('products').select('*');
             const { data: rawMaterialsData } = await supabase.from('raw_materials').select('*, units_of_measure(name, abbreviation)');
@@ -42,7 +38,11 @@ const AddRecipeForm = ({ onRecipeAdded }: AddRecipeFormProps) => {
         } catch (error) {
             console.error('Error fetching options:', error);
         }
-    }
+    }, [supabase]);
+
+    useEffect(() => {
+        fetchOptions();
+    }, [fetchOptions]);
 
     const handleCreateRecipe = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();

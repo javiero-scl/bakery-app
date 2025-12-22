@@ -1,5 +1,5 @@
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Database } from '../types/supabase';
 import AddSaleForm from '../components/AddSaleForm';
@@ -22,11 +22,7 @@ const Sales = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    useEffect(() => {
-        fetchSales();
-    }, [session]);
-
-    async function fetchSales() {
+    const fetchSales = useCallback(async () => {
         try {
             setIsLoading(true);
             const { data, error } = await supabase
@@ -44,7 +40,11 @@ const Sales = () => {
         } finally {
             setIsLoading(false);
         }
-    }
+    }, [supabase]);
+
+    useEffect(() => {
+        fetchSales();
+    }, [session, fetchSales]);
 
     const handleSaleAdded = (newSale: any) => {
         setSales([newSale, ...sales]);

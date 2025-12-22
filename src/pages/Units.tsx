@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
 import AddUnitForm from '../components/AddUnitForm';
@@ -13,13 +13,7 @@ const Units = () => {
     const [units, setUnits] = useState<UnitOfMeasure[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (session) {
-            fetchUnits();
-        }
-    }, [session]);
-
-    async function fetchUnits() {
+    const fetchUnits = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('units_of_measure')
@@ -33,7 +27,13 @@ const Units = () => {
         } finally {
             setLoading(false);
         }
-    }
+    }, [supabase]);
+
+    useEffect(() => {
+        if (session) {
+            fetchUnits();
+        }
+    }, [session, fetchUnits]);
 
     const handleUnitAdded = (newUnit: UnitOfMeasure) => {
         setUnits([newUnit, ...units]);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
 import { Database } from '../types/supabase';
@@ -22,18 +22,18 @@ const AddPurchaseForm = ({ onPurchaseAdded }: AddPurchaseFormProps) => {
     const [purchaseDate, setPurchaseDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        fetchRawMaterials();
-    }, []);
-
-    async function fetchRawMaterials() {
+    const fetchRawMaterials = useCallback(async () => {
         try {
             const { data } = await supabase.from('raw_materials').select('*, units_of_measure(name, abbreviation)');
             if (data) setRawMaterials(data as any);
         } catch (error) {
             console.error('Error fetching raw materials:', error);
         }
-    }
+    }, [supabase]);
+
+    useEffect(() => {
+        fetchRawMaterials();
+    }, [fetchRawMaterials]);
 
     const handleCreatePurchase = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();

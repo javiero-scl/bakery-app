@@ -1,5 +1,5 @@
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Database } from '../types/supabase';
 import AddRawMaterialForm from '../components/AddRawMaterialForm';
@@ -23,11 +23,7 @@ const RawMaterials = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    useEffect(() => {
-        fetchRawMaterials();
-    }, [session]);
-
-    async function fetchRawMaterials() {
+    const fetchRawMaterials = useCallback(async () => {
         try {
             setIsLoading(true);
             const { data: rawMaterialsData, error: rmError } = await supabase
@@ -54,7 +50,11 @@ const RawMaterials = () => {
         } finally {
             setIsLoading(false);
         }
-    }
+    }, [supabase]);
+
+    useEffect(() => {
+        fetchRawMaterials();
+    }, [session, fetchRawMaterials]);
 
     const handleRawMaterialAdded = (newRawMaterial: Database['public']['Tables']['raw_materials']['Row']) => {
         setRawMaterials([newRawMaterial as RawMaterial, ...rawMaterials]);

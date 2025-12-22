@@ -1,5 +1,5 @@
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Database } from '../types/supabase';
 import UserItem from '../components/UserItem';
@@ -20,11 +20,7 @@ const Users = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    useEffect(() => {
-        fetchUsers();
-    }, [session]);
-
-    async function fetchUsers() {
+    const fetchUsers = useCallback(async () => {
         try {
             setIsLoading(true);
             const { data, error } = await supabase
@@ -42,7 +38,11 @@ const Users = () => {
         } finally {
             setIsLoading(false);
         }
-    }
+    }, [supabase]);
+
+    useEffect(() => {
+        fetchUsers();
+    }, [session, fetchUsers]);
 
     const handleCreateUser = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();

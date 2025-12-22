@@ -1,11 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
 import { Database } from '../types/supabase';
-
-type RawMaterial = Database['public']['Tables']['raw_materials']['Row'] & {
-    units_of_measure: { name: string; abbreviation: string } | null;
-};
 
 interface AddRawMaterialFormProps {
     onRawMaterialAdded: (rawMaterial: Database['public']['Tables']['raw_materials']['Row']) => void;
@@ -18,11 +14,7 @@ const AddRawMaterialForm = ({ onRawMaterialAdded }: AddRawMaterialFormProps) => 
     const [units, setUnits] = useState<Database['public']['Tables']['units_of_measure']['Row'][]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        fetchUnits();
-    }, []);
-
-    async function fetchUnits() {
+    const fetchUnits = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('units_of_measure')
@@ -34,7 +26,11 @@ const AddRawMaterialForm = ({ onRawMaterialAdded }: AddRawMaterialFormProps) => 
         } catch (error: any) {
             toast.error('Error al cargar unidades: ' + error.message);
         }
-    }
+    }, [supabase]);
+
+    useEffect(() => {
+        fetchUnits();
+    }, [fetchUnits]);
 
     const handleCreateRawMaterial = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();

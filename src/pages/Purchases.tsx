@@ -1,5 +1,5 @@
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Database } from '../types/supabase';
 import AddPurchaseForm from '../components/AddPurchaseForm';
@@ -23,11 +23,7 @@ const Purchases = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    useEffect(() => {
-        fetchPurchases();
-    }, [session]);
-
-    async function fetchPurchases() {
+    const fetchPurchases = useCallback(async () => {
         try {
             setIsLoading(true);
             const { data, error } = await supabase
@@ -45,7 +41,11 @@ const Purchases = () => {
         } finally {
             setIsLoading(false);
         }
-    }
+    }, [supabase]);
+
+    useEffect(() => {
+        fetchPurchases();
+    }, [session, fetchPurchases]);
 
     const handlePurchaseAdded = (newPurchase: any) => {
         setPurchases([newPurchase, ...purchases]);

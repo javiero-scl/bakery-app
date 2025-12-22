@@ -1,5 +1,5 @@
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Database } from '../types/supabase';
 import RolItem from '../components/RolItem';
@@ -20,11 +20,7 @@ const Roles = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    useEffect(() => {
-        fetchRoles();
-    }, [session]);
-
-    async function fetchRoles() {
+    const fetchRoles = useCallback(async () => {
         try {
             setIsLoading(true);
             const { data, error } = await supabase
@@ -42,7 +38,11 @@ const Roles = () => {
         } finally {
             setIsLoading(false);
         }
-    }
+    }, [supabase]);
+
+    useEffect(() => {
+        fetchRoles();
+    }, [session, fetchRoles]);
 
     const handleCreateRole = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();

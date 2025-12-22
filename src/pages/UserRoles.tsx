@@ -1,5 +1,5 @@
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Database } from '../types/supabase';
 import Modal from '../components/Modal';
@@ -27,11 +27,7 @@ const UserRoles = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    useEffect(() => {
-        fetchData();
-    }, [session]);
-
-    async function fetchData() {
+    const fetchData = useCallback(async () => {
         try {
             setIsLoading(true);
             // Note: The foreign key relationships in supabase.ts are:
@@ -56,7 +52,11 @@ const UserRoles = () => {
         } finally {
             setIsLoading(false);
         }
-    }
+    }, [supabase]);
+
+    useEffect(() => {
+        fetchData();
+    }, [session, fetchData]);
 
     const handleAssignRole = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();

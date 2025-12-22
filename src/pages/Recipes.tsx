@@ -1,5 +1,5 @@
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Database } from '../types/supabase';
 import AddRecipeForm from '../components/AddRecipeForm';
@@ -25,14 +25,7 @@ const Recipes = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    useEffect(() => {
-        if (session) {
-            fetchRecipes();
-            fetchUnits();
-        }
-    }, [session]);
-
-    async function fetchRecipes() {
+    const fetchRecipes = useCallback(async () => {
         try {
             setIsLoading(true);
             const { data, error } = await supabase
@@ -50,9 +43,9 @@ const Recipes = () => {
         } finally {
             setIsLoading(false);
         }
-    }
+    }, [supabase]);
 
-    async function fetchUnits() {
+    const fetchUnits = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('units_of_measure')
@@ -64,7 +57,14 @@ const Recipes = () => {
         } catch (error: any) {
             toast.error('Error al cargar unidades: ' + error.message);
         }
-    }
+    }, [supabase]);
+
+    useEffect(() => {
+        if (session) {
+            fetchRecipes();
+            fetchUnits();
+        }
+    }, [session, fetchRecipes, fetchUnits]);
 
     const handleRecipeAdded = (newRecipe: any) => {
         setRecipes([newRecipe, ...recipes]);

@@ -83,29 +83,31 @@ const UnitItem = ({ unit, onUnitUpdated, onUnitDeleted }: UnitItemProps) => {
     if (isEditing) {
         return (
             <tr>
-                <td>
-                    <input
-                        type="text"
-                        value={editFormState.name}
-                        onChange={(e) => setEditFormState({ ...editFormState, name: e.target.value })}
-                        required
-                        className="form-input"
-                    />
-                </td>
-                <td>
-                    <input
-                        type="text"
-                        value={editFormState.abbreviation}
-                        onChange={(e) => setEditFormState({ ...editFormState, abbreviation: e.target.value })}
-                        className="form-input"
-                    />
-                </td>
-                <td>
-                    <div className="button-group">
-                        <button type="submit" form={`edit-form-${unit.id}`} className="button">Guardar</button>
-                        <button type="button" className="button button-secondary" onClick={handleCancelEditing}>Cancelar</button>
-                    </div>
-                </td>
+                <form id={`edit-form-${unit.id}`} onSubmit={handleUpdateUnit}>
+                    <td>
+                        <input
+                            type="text"
+                            value={editFormState.name}
+                            onChange={(e) => setEditFormState({ ...editFormState, name: e.target.value })}
+                            required
+                            className="form-input"
+                        />
+                    </td>
+                    <td>
+                        <input
+                            type="text"
+                            value={editFormState.abbreviation}
+                            onChange={(e) => setEditFormState({ ...editFormState, abbreviation: e.target.value })}
+                            className="form-input"
+                        />
+                    </td>
+                    <td>
+                        <div className="button-group">
+                            <button type="submit" className="button">Guardar</button>
+                            <button type="button" className="button button-secondary" onClick={handleCancelEditing}>Cancelar</button>
+                        </div>
+                    </td>
+                </form>
             </tr>
         );
     }

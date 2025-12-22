@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
 import { Database } from '../types/supabase';
@@ -20,18 +20,18 @@ const AddSaleForm = ({ onSaleAdded }: AddSaleFormProps) => {
     const [saleDate, setSaleDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        fetchProducts();
-    }, []);
-
-    async function fetchProducts() {
+    const fetchProducts = useCallback(async () => {
         try {
             const { data } = await supabase.from('products').select('*');
             if (data) setProducts(data);
         } catch (error) {
             console.error('Error fetching products:', error);
         }
-    }
+    }, [supabase]);
+
+    useEffect(() => {
+        fetchProducts();
+    }, [fetchProducts]);
 
     const handleCreateSale = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
