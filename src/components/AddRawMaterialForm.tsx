@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 
 interface AddRawMaterialFormProps {
@@ -8,7 +8,7 @@ interface AddRawMaterialFormProps {
 }
 
 const AddRawMaterialForm = ({ onRawMaterialAdded }: AddRawMaterialFormProps) => {
-    const supabase = useSupabaseClient();
+
     const [name, setName] = useState('');
     const [unitId, setUnitId] = useState<number | ''>('');
     const [units, setUnits] = useState<Database['public']['Tables']['units_of_measure']['Row'][]>([]);
@@ -26,7 +26,7 @@ const AddRawMaterialForm = ({ onRawMaterialAdded }: AddRawMaterialFormProps) => 
         } catch (error: any) {
             toast.error('Error al cargar unidades: ' + error.message);
         }
-    }, [supabase]);
+    }, []);
 
     useEffect(() => {
         fetchUnits();
@@ -93,3 +93,5 @@ const AddRawMaterialForm = ({ onRawMaterialAdded }: AddRawMaterialFormProps) => 
 };
 
 export default AddRawMaterialForm;
+
+

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 
 type UnitOfMeasure = Database['public']['Tables']['units_of_measure']['Row'];
@@ -12,7 +12,7 @@ interface UnitItemProps {
 }
 
 const UnitItem = ({ unit, onUnitUpdated, onUnitDeleted }: UnitItemProps) => {
-    const supabase = useSupabaseClient();
+
     const [isEditing, setIsEditing] = useState(false);
     const [editFormState, setEditFormState] = useState({
         name: unit.name || '',
@@ -127,3 +127,4 @@ const UnitItem = ({ unit, onUnitUpdated, onUnitDeleted }: UnitItemProps) => {
 };
 
 export default UnitItem;
+

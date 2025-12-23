@@ -1,6 +1,7 @@
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
+
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 import AddProductForm from '../components/AddProductForm';
 import ProductItem from '../components/ProductItem';
@@ -9,8 +10,6 @@ import Modal from '../components/Modal';
 type Product = Database['public']['Tables']['products']['Row'];
 
 const Products = () => {
-  const session = useSession();
-  const supabase = useSupabaseClient();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -38,11 +37,11 @@ const Products = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [supabase]);
+  }, []);
 
   useEffect(() => {
     fetchProducts();
-  }, [session, fetchProducts]);
+  }, [fetchProducts]);
 
   const handleProductAdded = (newProduct: Product) => {
     setProducts([newProduct, ...products]);
@@ -183,3 +182,6 @@ const Products = () => {
 };
 
 export default Products;
+
+
+

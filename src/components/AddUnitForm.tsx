@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 
 type UnitOfMeasure = Database['public']['Tables']['units_of_measure']['Row'];
@@ -10,7 +10,7 @@ interface AddUnitFormProps {
 }
 
 const AddUnitForm = ({ onUnitAdded }: AddUnitFormProps) => {
-    const supabase = useSupabaseClient();
+
     const [name, setName] = useState('');
     const [abbreviation, setAbbreviation] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,3 +78,4 @@ const AddUnitForm = ({ onUnitAdded }: AddUnitFormProps) => {
 };
 
 export default AddUnitForm;
+

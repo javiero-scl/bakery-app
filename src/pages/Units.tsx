@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import AddUnitForm from '../components/AddUnitForm';
 import UnitItem from '../components/UnitItem';
 import { Database } from '../types/supabase';
@@ -8,8 +8,8 @@ import { Database } from '../types/supabase';
 type UnitOfMeasure = Database['public']['Tables']['units_of_measure']['Row'];
 
 const Units = () => {
-    const session = useSession();
-    const supabase = useSupabaseClient();
+
+
     const [units, setUnits] = useState<UnitOfMeasure[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -27,13 +27,11 @@ const Units = () => {
         } finally {
             setLoading(false);
         }
-    }, [supabase]);
+    }, []);
 
     useEffect(() => {
-        if (session) {
-            fetchUnits();
-        }
-    }, [session, fetchUnits]);
+        fetchUnits();
+    }, [fetchUnits]);
 
     const handleUnitAdded = (newUnit: UnitOfMeasure) => {
         setUnits([newUnit, ...units]);
@@ -46,10 +44,6 @@ const Units = () => {
     const handleUnitDeleted = (id: number) => {
         setUnits(units.filter(u => u.id !== id));
     };
-
-    if (!session) {
-        return <div>Cargando...</div>;
-    }
 
     return (
         <div className="container">
@@ -83,3 +77,5 @@ const Units = () => {
 };
 
 export default Units;
+
+

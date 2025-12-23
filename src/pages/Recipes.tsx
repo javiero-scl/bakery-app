@@ -1,6 +1,7 @@
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
+
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 import AddRecipeForm from '../components/AddRecipeForm';
 import RecipeItem from '../components/RecipeItem';
@@ -13,8 +14,8 @@ type Recipe = Database['public']['Tables']['recipes']['Row'] & {
 };
 
 const Recipes = () => {
-    const session = useSession();
-    const supabase = useSupabaseClient();
+
+
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [units, setUnits] = useState<Database['public']['Tables']['units_of_measure']['Row'][]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +44,7 @@ const Recipes = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [supabase]);
+    }, []);
 
     const fetchUnits = useCallback(async () => {
         try {
@@ -57,14 +58,12 @@ const Recipes = () => {
         } catch (error: any) {
             toast.error('Error al cargar unidades: ' + error.message);
         }
-    }, [supabase]);
+    }, []);
 
     useEffect(() => {
-        if (session) {
-            fetchRecipes();
-            fetchUnits();
-        }
-    }, [session, fetchRecipes, fetchUnits]);
+        fetchRecipes();
+        fetchUnits();
+    }, [fetchRecipes, fetchUnits]);
 
     const handleRecipeAdded = (newRecipe: any) => {
         setRecipes([newRecipe, ...recipes]);
@@ -207,3 +206,6 @@ const Recipes = () => {
 };
 
 export default Recipes;
+
+
+

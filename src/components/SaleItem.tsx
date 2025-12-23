@@ -82,3 +82,5 @@ const SaleItem = ({
 };
 
 export default SaleItem;
+
+

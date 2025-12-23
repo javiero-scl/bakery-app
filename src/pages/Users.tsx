@@ -1,6 +1,7 @@
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
+
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 import UserItem from '../components/UserItem';
 import Modal from '../components/Modal';
@@ -8,8 +9,8 @@ import Modal from '../components/Modal';
 type User = Database['public']['Tables']['user']['Row'];
 
 const Users = () => {
-    const session = useSession();
-    const supabase = useSupabaseClient();
+
+
     const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -38,11 +39,11 @@ const Users = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [supabase]);
+    }, []);
 
     useEffect(() => {
         fetchUsers();
-    }, [session, fetchUsers]);
+    }, [fetchUsers]);
 
     const handleCreateUser = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -230,3 +231,6 @@ const Users = () => {
 };
 
 export default Users;
+
+
+

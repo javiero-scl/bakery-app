@@ -1,6 +1,7 @@
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
+
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 import AddProductionForm from '../components/AddProductionForm';
 import ProductionItem from '../components/ProductionItem';
@@ -11,8 +12,8 @@ type Production = Database['public']['Tables']['productions']['Row'] & {
 };
 
 const Productions = () => {
-    const session = useSession();
-    const supabase = useSupabaseClient();
+
+
     const [productions, setProductions] = useState<Production[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -40,11 +41,11 @@ const Productions = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [supabase]);
+    }, []);
 
     useEffect(() => {
         fetchProductions();
-    }, [session, fetchProductions]);
+    }, [fetchProductions]);
 
     const handleProductionAdded = (newProduction: any) => {
         setProductions([newProduction, ...productions]);
@@ -185,3 +186,6 @@ const Productions = () => {
 };
 
 export default Productions;
+
+
+

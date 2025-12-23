@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { supabase } from '../lib/supabaseClient';
 
 const Layout = () => {
-    const supabase = useSupabaseClient();
     const location = useLocation();
 
     const menuItems = [
@@ -48,3 +47,6 @@ const Layout = () => {
 };
 
 export default Layout;
+
+
+

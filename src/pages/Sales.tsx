@@ -1,6 +1,7 @@
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
+
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 import AddSaleForm from '../components/AddSaleForm';
 import SaleItem from '../components/SaleItem';
@@ -11,8 +12,8 @@ type Sale = Database['public']['Tables']['sales']['Row'] & {
 };
 
 const Sales = () => {
-    const session = useSession();
-    const supabase = useSupabaseClient();
+
+
     const [sales, setSales] = useState<Sale[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -40,11 +41,11 @@ const Sales = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [supabase]);
+    }, []);
 
     useEffect(() => {
         fetchSales();
-    }, [session, fetchSales]);
+    }, [fetchSales]);
 
     const handleSaleAdded = (newSale: any) => {
         setSales([newSale, ...sales]);
@@ -188,3 +189,6 @@ const Sales = () => {
 };
 
 export default Sales;
+
+
+

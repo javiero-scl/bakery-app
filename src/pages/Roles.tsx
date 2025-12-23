@@ -1,6 +1,7 @@
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
+
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 import RolItem from '../components/RolItem';
 import Modal from '../components/Modal';
@@ -8,8 +9,8 @@ import Modal from '../components/Modal';
 type Role = Database['public']['Tables']['rol']['Row'];
 
 const Roles = () => {
-    const session = useSession();
-    const supabase = useSupabaseClient();
+
+
     const [roles, setRoles] = useState<Role[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -38,11 +39,11 @@ const Roles = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [supabase]);
+    }, []);
 
     useEffect(() => {
         fetchRoles();
-    }, [session, fetchRoles]);
+    }, [fetchRoles]);
 
     const handleCreateRole = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -210,3 +211,6 @@ const Roles = () => {
 };
 
 export default Roles;
+
+
+

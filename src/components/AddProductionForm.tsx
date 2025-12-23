@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 
 type Production = Database['public']['Tables']['productions']['Row'];
@@ -11,7 +11,6 @@ interface AddProductionFormProps {
 }
 
 const AddProductionForm = ({ onProductionAdded }: AddProductionFormProps) => {
-    const supabase = useSupabaseClient();
     const [products, setProducts] = useState<Product[]>([]);
 
     const [selectedProductId, setSelectedProductId] = useState<number | ''>('');
@@ -26,7 +25,7 @@ const AddProductionForm = ({ onProductionAdded }: AddProductionFormProps) => {
         } catch (error) {
             console.error('Error fetching products:', error);
         }
-    }, [supabase]);
+    }, []);
 
     useEffect(() => {
         fetchProducts();
@@ -107,3 +106,5 @@ const AddProductionForm = ({ onProductionAdded }: AddProductionFormProps) => {
 };
 
 export default AddProductionForm;
+
+

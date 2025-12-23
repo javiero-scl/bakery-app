@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 
 type Purchase = Database['public']['Tables']['purchases']['Row'];
@@ -13,7 +13,7 @@ interface AddPurchaseFormProps {
 }
 
 const AddPurchaseForm = ({ onPurchaseAdded }: AddPurchaseFormProps) => {
-    const supabase = useSupabaseClient();
+
     const [rawMaterials, setRawMaterials] = useState<RawMaterial[]>([]);
 
     const [selectedRawMaterialId, setSelectedRawMaterialId] = useState<number | ''>('');
@@ -118,3 +118,6 @@ const AddPurchaseForm = ({ onPurchaseAdded }: AddPurchaseFormProps) => {
 };
 
 export default AddPurchaseForm;
+
+
+

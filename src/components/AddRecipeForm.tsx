@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 
 type Recipe = Database['public']['Tables']['recipes']['Row'];
@@ -15,7 +15,7 @@ interface AddRecipeFormProps {
 }
 
 const AddRecipeForm = ({ onRecipeAdded }: AddRecipeFormProps) => {
-    const supabase = useSupabaseClient();
+
     const [products, setProducts] = useState<Product[]>([]);
     const [rawMaterials, setRawMaterials] = useState<RawMaterial[]>([]);
     const [units, setUnits] = useState<UnitOfMeasure[]>([]);
@@ -33,12 +33,12 @@ const AddRecipeForm = ({ onRecipeAdded }: AddRecipeFormProps) => {
             const { data: unitsData } = await supabase.from('units_of_measure').select('*');
 
             if (productsData) setProducts(productsData);
-            if (rawMaterialsData) setRawMaterials(rawMaterialsData);
+            if (rawMaterialsData) setRawMaterials(rawMaterialsData as any);
             if (unitsData) setUnits(unitsData);
         } catch (error) {
             console.error('Error fetching options:', error);
         }
-    }, [supabase]);
+    }, []);
 
     useEffect(() => {
         fetchOptions();
@@ -136,3 +136,6 @@ const AddRecipeForm = ({ onRecipeAdded }: AddRecipeFormProps) => {
 };
 
 export default AddRecipeForm;
+
+
+

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 
 // Usamos el tipo generado automáticamente
@@ -13,7 +13,6 @@ interface AddProductFormProps {
 }
 
 const AddProductForm = ({ onProductAdded }: AddProductFormProps) => {
-  const supabase = useSupabaseClient();
   const [newProductName, setNewProductName] = useState('');
   const [newProductDescription, setNewProductDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,3 +64,4 @@ const AddProductForm = ({ onProductAdded }: AddProductFormProps) => {
 };
 
 export default AddProductForm;
+

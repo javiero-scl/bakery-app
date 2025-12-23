@@ -1,6 +1,7 @@
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
+
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 import AddRawMaterialForm from '../components/AddRawMaterialForm';
 import RawMaterialItem from '../components/RawMaterialItem';
@@ -11,8 +12,8 @@ type RawMaterial = Database['public']['Tables']['raw_materials']['Row'] & {
 };
 
 const RawMaterials = () => {
-    const session = useSession();
-    const supabase = useSupabaseClient();
+
+
     const [rawMaterials, setRawMaterials] = useState<RawMaterial[]>([]);
     const [units, setUnits] = useState<Database['public']['Tables']['units_of_measure']['Row'][]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +41,7 @@ const RawMaterials = () => {
             if (uError) throw uError;
 
             if (rawMaterialsData) {
-                setRawMaterials(rawMaterialsData);
+                setRawMaterials(rawMaterialsData as any);
             }
             if (unitsData) {
                 setUnits(unitsData);
@@ -50,11 +51,11 @@ const RawMaterials = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [supabase]);
+    }, []);
 
     useEffect(() => {
         fetchRawMaterials();
-    }, [session, fetchRawMaterials]);
+    }, [fetchRawMaterials]);
 
     const handleRawMaterialAdded = (newRawMaterial: Database['public']['Tables']['raw_materials']['Row']) => {
         setRawMaterials([newRawMaterial as RawMaterial, ...rawMaterials]);
@@ -195,3 +196,6 @@ const RawMaterials = () => {
 };
 
 export default RawMaterials;
+
+
+

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 
 type Sale = Database['public']['Tables']['sales']['Row'];
@@ -11,7 +11,7 @@ interface AddSaleFormProps {
 }
 
 const AddSaleForm = ({ onSaleAdded }: AddSaleFormProps) => {
-    const supabase = useSupabaseClient();
+
     const [products, setProducts] = useState<Product[]>([]);
 
     const [selectedProductId, setSelectedProductId] = useState<number | ''>('');
@@ -116,3 +116,6 @@ const AddSaleForm = ({ onSaleAdded }: AddSaleFormProps) => {
 };
 
 export default AddSaleForm;
+
+
+

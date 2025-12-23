@@ -1,6 +1,7 @@
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
+
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/supabase';
 import AddPurchaseForm from '../components/AddPurchaseForm';
 import PurchaseItem from '../components/PurchaseItem';
@@ -12,8 +13,8 @@ type Purchase = Database['public']['Tables']['purchases']['Row'] & {
 };
 
 const Purchases = () => {
-    const session = useSession();
-    const supabase = useSupabaseClient();
+
+
     const [purchases, setPurchases] = useState<Purchase[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -41,11 +42,11 @@ const Purchases = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [supabase]);
+    }, []);
 
     useEffect(() => {
         fetchPurchases();
-    }, [session, fetchPurchases]);
+    }, [fetchPurchases]);
 
     const handlePurchaseAdded = (newPurchase: any) => {
         setPurchases([newPurchase, ...purchases]);
@@ -189,3 +190,6 @@ const Purchases = () => {
 };
 
 export default Purchases;
+
+
+
