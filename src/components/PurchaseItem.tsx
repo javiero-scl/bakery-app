@@ -2,8 +2,10 @@ import React from 'react';
 import { Database } from '../types/supabase';
 
 type Purchase = Database['public']['Tables']['purchases']['Row'] & {
-    raw_materials: { name: string } | null;
-    units_of_measure: { name: string; abbreviation: string } | null;
+    raw_materials: {
+        name: string;
+        units_of_measure: { name: string; abbreviation: string } | null;
+    } | null;
 };
 
 interface PurchaseItemProps {
@@ -69,7 +71,7 @@ const PurchaseItem = ({
     return (
         <tr>
             <td>{purchase.raw_materials?.name}</td>
-            <td>{purchase.quantity} {purchase.units_of_measure?.name} {purchase.units_of_measure?.abbreviation ? `(${purchase.units_of_measure.abbreviation})` : ''}</td>
+            <td>{purchase.quantity} {purchase.raw_materials?.units_of_measure?.name} {purchase.raw_materials?.units_of_measure?.abbreviation ? `(${purchase.raw_materials.units_of_measure.abbreviation})` : ''}</td>
             <td>${purchase.total_cost}</td>
             <td>{purchase.purchase_date}</td>
             <td>

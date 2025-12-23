@@ -8,8 +8,10 @@ import PurchaseItem from '../components/PurchaseItem';
 import Modal from '../components/Modal';
 
 type Purchase = Database['public']['Tables']['purchases']['Row'] & {
-    raw_materials: { name: string } | null;
-    units_of_measure: { name: string; abbreviation: string } | null;
+    raw_materials: {
+        name: string;
+        units_of_measure: { name: string; abbreviation: string } | null;
+    } | null;
 };
 
 const Purchases = () => {
@@ -29,7 +31,7 @@ const Purchases = () => {
             setIsLoading(true);
             const { data, error } = await supabase
                 .from('purchases')
-                .select('*, raw_materials(name), units_of_measure(name, abbreviation)')
+                .select('*, raw_materials(name, units_of_measure(name, abbreviation))')
                 .order('purchase_date', { ascending: false });
 
             if (error) throw error;
