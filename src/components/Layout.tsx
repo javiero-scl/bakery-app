@@ -1,8 +1,12 @@
 import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
+import { account } from '../lib/appwriteClient';
 
-const Layout = () => {
+interface LayoutProps {
+  onLogout: () => void;
+}
+
+const Layout = ({ onLogout }: LayoutProps) => {
     const location = useLocation();
 
     const menuItems = [
@@ -17,6 +21,16 @@ const Layout = () => {
         { path: '/roles', label: 'Roles' },
         { path: '/user-roles', label: 'Asignar Roles' },
     ];
+
+    const handleLogout = async () => {
+        try {
+            await account.deleteSession('current');
+        } catch {
+            // Si la sesión ya expiró o hay error, igual limpiamos el estado
+        } finally {
+            onLogout();
+        }
+    };
 
     return (
         <div className="app-layout">
@@ -34,7 +48,7 @@ const Layout = () => {
                     </ul>
                 </nav>
                 <div className="sidebar-footer">
-                    <button className="button logout-btn" onClick={() => supabase.auth.signOut()}>
+                    <button className="button logout-btn" onClick={handleLogout}>
                         Cerrar Sesión
                     </button>
                 </div>
@@ -47,6 +61,3 @@ const Layout = () => {
 };
 
 export default Layout;
-
-
-

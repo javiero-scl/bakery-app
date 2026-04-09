@@ -1,13 +1,8 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { supabase } from '../lib/supabaseClient';
-import { Database } from '../types/supabase';
+import apiClient from '../lib/apiClient';
+import { Product } from '../pages/Products';
 
-// Usamos el tipo generado automáticamente
-type Product = Database['public']['Tables']['products']['Row'];
-
-// Definimos las props que recibirá el componente.
-// Necesita una función para notificar al padre cuando un producto es añadido.
 interface AddProductFormProps {
   onProductAdded: (product: Product) => void;
 }
@@ -19,31 +14,22 @@ const AddProductForm = ({ onProductAdded }: AddProductFormProps) => {
 
   const handleCreateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     if (!newProductName) {
       toast.error('El nombre del producto es obligatorio.');
       return;
     }
-
     setIsSubmitting(true);
-
     try {
-      const { data, error: insertError } = await supabase
-        .from('products')
-        .insert({ name: newProductName, description: newProductDescription })
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
-
-      if (data) {
-        onProductAdded(data); // Llama a la función del padre para actualizar el estado
-        toast.success('¡Producto creado exitosamente!');
-        setNewProductName('');
-        setNewProductDescription('');
-      }
+      const { data } = await apiClient.post('/products', {
+        name: newProductName,
+        description: newProductDescription,
+      });
+      onProductAdded(data);
+      toast.success('¡Producto creado exitosamente!');
+      setNewProductName('');
+      setNewProductDescription('');
     } catch (error: any) {
-      toast.error(`Error al crear el producto: ${error.message}`);
+      toast.error(`Error al crear el producto: ${error.response?.data?.message || error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -64,4 +50,3 @@ const AddProductForm = ({ onProductAdded }: AddProductFormProps) => {
 };
 
 export default AddProductForm;
-

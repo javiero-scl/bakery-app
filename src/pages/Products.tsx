@@ -1,39 +1,32 @@
-
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { supabase } from '../lib/supabaseClient';
-import { Database } from '../types/supabase';
+import apiClient from '../lib/apiClient';
 import AddProductForm from '../components/AddProductForm';
 import ProductItem from '../components/ProductItem';
 import Modal from '../components/Modal';
 
-type Product = Database['public']['Tables']['products']['Row'];
+export type Product = {
+  _id: string;
+  name: string;
+  description: string;
+  created_at: string;
+};
 
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editFormState, setEditFormState] = useState({ name: '', description: '' });
-
-  // New state for Search and Modal
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchProducts = useCallback(async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      if (data) {
-        setProducts(data);
-      }
+      const { data } = await apiClient.get('/products');
+      setProducts(data);
     } catch (error: any) {
-      toast.error('Error al cargar productos: ' + error.message);
+      toast.error('Error al cargar productos: ' + (error.response?.data?.message || error.message));
     } finally {
       setIsLoading(false);
     }
@@ -45,15 +38,12 @@ const Products = () => {
 
   const handleProductAdded = (newProduct: Product) => {
     setProducts([newProduct, ...products]);
-    setIsModalOpen(false); // Close modal after adding
+    setIsModalOpen(false);
   };
 
   const handleStartEditing = (product: Product) => {
-    setEditingId(product.id);
-    setEditFormState({
-      name: product.name || '',
-      description: product.description || ''
-    });
+    setEditingId(product._id);
+    setEditFormState({ name: product.name || '', description: product.description || '' });
   };
 
   const handleCancelEditing = () => {
@@ -64,50 +54,27 @@ const Products = () => {
   const handleUpdateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editingId) return;
-
     try {
-      const { error } = await supabase
-        .from('products')
-        .update({
-          name: editFormState.name,
-          description: editFormState.description
-        })
-        .eq('id', editingId);
-
-      if (error) throw error;
-
-      setProducts(products.map(p =>
-        p.id === editingId
-          ? { ...p, ...editFormState }
-          : p
-      ));
-
+      const { data } = await apiClient.put(`/products/${editingId}`, editFormState);
+      setProducts(products.map(p => p._id === editingId ? data : p));
       toast.success('Producto actualizado');
       handleCancelEditing();
     } catch (error: any) {
-      toast.error('Error al actualizar: ' + error.message);
+      toast.error('Error al actualizar: ' + (error.response?.data?.message || error.message));
     }
   };
 
-  const handleDeleteProduct = async (id: number) => {
+  const handleDeleteProduct = async (id: string) => {
     if (!window.confirm('¿Estás seguro de eliminar este producto?')) return;
-
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      setProducts(products.filter(p => p.id !== id));
+      await apiClient.delete(`/products/${id}`);
+      setProducts(products.filter(p => p._id !== id));
       toast.success('Producto eliminado');
     } catch (error: any) {
-      toast.error('Error al eliminar: ' + error.message);
+      toast.error('Error al eliminar: ' + (error.response?.data?.message || error.message));
     }
   };
 
-  // Filter products based on search term
   const filteredProducts = products.filter(product =>
     product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.description?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -118,7 +85,6 @@ const Products = () => {
       <div className="header">
         <h2>Gestión de Productos</h2>
       </div>
-
       <div className="content">
         <div className="section">
           <div className="header-actions">
@@ -129,25 +95,15 @@ const Products = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <button className="button" onClick={() => setIsModalOpen(true)}>
-              Agregar
-            </button>
+            <button className="button" onClick={() => setIsModalOpen(true)}>Agregar</button>
           </div>
-
-          <Modal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            title="Agregar Producto"
-          >
+          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Agregar Producto">
             <AddProductForm onProductAdded={handleProductAdded} />
           </Modal>
         </div>
-
         <div className="section">
           <h3>Lista de Productos</h3>
-          {isLoading ? (
-            <p>Cargando...</p>
-          ) : (
+          {isLoading ? (<p>Cargando...</p>) : (
             <div className="table-container">
               <table className="table">
                 <thead>
@@ -160,9 +116,9 @@ const Products = () => {
                 <tbody>
                   {filteredProducts.map((product) => (
                     <ProductItem
-                      key={product.id}
+                      key={product._id}
                       product={product}
-                      isEditing={editingId === product.id}
+                      isEditing={editingId === product._id}
                       editFormState={editFormState}
                       onStartEditing={handleStartEditing}
                       onCancelEditing={handleCancelEditing}
@@ -182,6 +138,3 @@ const Products = () => {
 };
 
 export default Products;
-
-
-

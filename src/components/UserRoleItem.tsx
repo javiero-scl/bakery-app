@@ -1,31 +1,23 @@
 import React from 'react';
-import { Database } from '../types/supabase';
-
-type UserRole = Database['public']['Tables']['user_rol']['Row'] & {
-    user: { user_name: string } | null;
-    rol: { rol_name: string } | null;
-};
+import { UserRole } from '../pages/UserRoles';
 
 interface UserRoleItemProps {
-    userRole: UserRole;
-    onDeleteUserRole: (id: number) => Promise<void>;
+  userRole: UserRole;
+  onDeleteUserRole: (id: string) => Promise<void>;
 }
 
-const UserRoleItem = ({
-    userRole,
-    onDeleteUserRole,
-}: UserRoleItemProps) => {
-    return (
-        <tr>
-            <td>{userRole.user?.user_name}</td>
-            <td>{userRole.rol?.rol_name}</td>
-            <td>
-                <button className="button button-secondary" onClick={() => onDeleteUserRole(userRole.userrol_id)}>Eliminar</button>
-            </td>
-        </tr>
-    );
+const UserRoleItem = ({ userRole, onDeleteUserRole }: UserRoleItemProps) => {
+  return (
+    <tr>
+      <td>{userRole.user_name}</td>
+      <td>{userRole.rol_name}</td>
+      <td>
+        <button className="button button-secondary" onClick={() => onDeleteUserRole(userRole._id)}>
+          Eliminar
+        </button>
+      </td>
+    </tr>
+  );
 };
 
 export default UserRoleItem;
-
-

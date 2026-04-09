@@ -1,81 +1,74 @@
 import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
-import { supabase } from '../lib/supabaseClient';
+import apiClient from '../lib/apiClient';
 import AddUnitForm from '../components/AddUnitForm';
 import UnitItem from '../components/UnitItem';
-import { Database } from '../types/supabase';
 
-type UnitOfMeasure = Database['public']['Tables']['units_of_measure']['Row'];
+export type UnitOfMeasure = {
+  _id: string;
+  name: string;
+  abbreviation: string;
+  created_at: string;
+};
 
 const Units = () => {
+  const [units, setUnits] = useState<UnitOfMeasure[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  const fetchUnits = useCallback(async () => {
+    try {
+      const { data } = await apiClient.get('/units');
+      setUnits(data);
+    } catch (error: any) {
+      toast.error(`Error al cargar unidades: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    const [units, setUnits] = useState<UnitOfMeasure[]>([]);
-    const [loading, setLoading] = useState(true);
+  useEffect(() => { fetchUnits(); }, [fetchUnits]);
 
-    const fetchUnits = useCallback(async () => {
-        try {
-            const { data, error } = await supabase
-                .from('units_of_measure')
-                .select('*')
-                .order('name');
+  const handleUnitAdded = (newUnit: UnitOfMeasure) => {
+    setUnits([newUnit, ...units]);
+  };
 
-            if (error) throw error;
-            setUnits(data || []);
-        } catch (error: any) {
-            toast.error(`Error al cargar unidades: ${error.message}`);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+  const handleUnitUpdated = (updatedUnit: UnitOfMeasure) => {
+    setUnits(units.map(u => u._id === updatedUnit._id ? updatedUnit : u));
+  };
 
-    useEffect(() => {
-        fetchUnits();
-    }, [fetchUnits]);
+  const handleUnitDeleted = (id: string) => {
+    setUnits(units.filter(u => u._id !== id));
+  };
 
-    const handleUnitAdded = (newUnit: UnitOfMeasure) => {
-        setUnits([newUnit, ...units]);
-    };
-
-    const handleUnitUpdated = (updatedUnit: UnitOfMeasure) => {
-        setUnits(units.map(u => u.id === updatedUnit.id ? updatedUnit : u));
-    };
-
-    const handleUnitDeleted = (id: number) => {
-        setUnits(units.filter(u => u.id !== id));
-    };
-
-    return (
-        <div className="container">
-            <h1>Unidades de Medida</h1>
-            <AddUnitForm onUnitAdded={handleUnitAdded} />
-            {loading ? (
-                <p>Cargando unidades...</p>
-            ) : (
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Abreviatura</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {units.map(unit => (
-                            <UnitItem
-                                key={unit.id}
-                                unit={unit}
-                                onUnitUpdated={handleUnitUpdated}
-                                onUnitDeleted={handleUnitDeleted}
-                            />
-                        ))}
-                    </tbody>
-                </table>
-            )}
-        </div>
-    );
+  return (
+    <div className="container">
+      <h1>Unidades de Medida</h1>
+      <AddUnitForm onUnitAdded={handleUnitAdded} />
+      {loading ? (
+        <p>Cargando unidades...</p>
+      ) : (
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Abreviatura</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {units.map(unit => (
+              <UnitItem
+                key={unit._id}
+                unit={unit}
+                onUnitUpdated={handleUnitUpdated}
+                onUnitDeleted={handleUnitDeleted}
+              />
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
 };
 
 export default Units;
-
-

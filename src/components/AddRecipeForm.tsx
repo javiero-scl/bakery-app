@@ -1,141 +1,94 @@
 import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
-import { supabase } from '../lib/supabaseClient';
-import { Database } from '../types/supabase';
-
-type Recipe = Database['public']['Tables']['recipes']['Row'];
-type Product = Database['public']['Tables']['products']['Row'];
-type RawMaterial = Database['public']['Tables']['raw_materials']['Row'] & {
-    units_of_measure: { name: string; abbreviation: string } | null;
-};
-type UnitOfMeasure = Database['public']['Tables']['units_of_measure']['Row'];
+import apiClient from '../lib/apiClient';
+import { Recipe } from '../pages/Recipes';
+import { Product } from '../pages/Products';
+import { RawMaterial, Unit } from '../pages/RawMaterials';
 
 interface AddRecipeFormProps {
-    onRecipeAdded: (recipe: Recipe) => void;
+  onRecipeAdded: (recipe: Recipe) => void;
 }
 
 const AddRecipeForm = ({ onRecipeAdded }: AddRecipeFormProps) => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [rawMaterials, setRawMaterials] = useState<RawMaterial[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [selectedProductId, setSelectedProductId] = useState<string>('');
+  const [selectedRawMaterialId, setSelectedRawMaterialId] = useState<string>('');
+  const [selectedUnitId, setSelectedUnitId] = useState<string>('');
+  const [requiredQuantity, setRequiredQuantity] = useState<number | ''>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [products, setProducts] = useState<Product[]>([]);
-    const [rawMaterials, setRawMaterials] = useState<RawMaterial[]>([]);
-    const [units, setUnits] = useState<UnitOfMeasure[]>([]);
+  const fetchOptions = useCallback(async () => {
+    try {
+      const [productsRes, rawMaterialsRes, unitsRes] = await Promise.all([
+        apiClient.get('/products'),
+        apiClient.get('/raw-materials'),
+        apiClient.get('/units'),
+      ]);
+      setProducts(productsRes.data);
+      setRawMaterials(rawMaterialsRes.data);
+      setUnits(unitsRes.data);
+    } catch (error) {
+      console.error('Error fetching options:', error);
+    }
+  }, []);
 
-    const [selectedProductId, setSelectedProductId] = useState<number | ''>('');
-    const [selectedRawMaterialId, setSelectedRawMaterialId] = useState<number | ''>('');
-    const [selectedUnitId, setSelectedUnitId] = useState<number | ''>('');
-    const [requiredQuantity, setRequiredQuantity] = useState<number | ''>('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
+  useEffect(() => { fetchOptions(); }, [fetchOptions]);
 
-    const fetchOptions = useCallback(async () => {
-        try {
-            const { data: productsData } = await supabase.from('products').select('*');
-            const { data: rawMaterialsData } = await supabase.from('raw_materials').select('*, units_of_measure(name, abbreviation)');
-            const { data: unitsData } = await supabase.from('units_of_measure').select('*');
+  const handleCreateRecipe = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedProductId || !selectedRawMaterialId || !requiredQuantity || !selectedUnitId) {
+      toast.error('Todos los campos son obligatorios.');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const { data } = await apiClient.post('/recipes', {
+        product_id: selectedProductId,
+        raw_material_id: selectedRawMaterialId,
+        required_quantity: Number(requiredQuantity),
+        unit_id: selectedUnitId,
+      });
+      onRecipeAdded(data);
+      toast.success('Ingrediente añadido a la receta exitosamente!');
+      setRequiredQuantity('');
+      setSelectedUnitId('');
+    } catch (error: any) {
+      toast.error(`Error al crear: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-            if (productsData) setProducts(productsData);
-            if (rawMaterialsData) setRawMaterials(rawMaterialsData as any);
-            if (unitsData) setUnits(unitsData);
-        } catch (error) {
-            console.error('Error fetching options:', error);
-        }
-    }, []);
-
-    useEffect(() => {
-        fetchOptions();
-    }, [fetchOptions]);
-
-    const handleCreateRecipe = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        if (!selectedProductId || !selectedRawMaterialId || !requiredQuantity || !selectedUnitId) {
-            toast.error('Todos los campos son obligatorios.');
-            return;
-        }
-
-        setIsSubmitting(true);
-
-        try {
-            const { data, error } = await supabase
-                .from('recipes')
-                .insert({
-                    product_id: Number(selectedProductId),
-                    raw_material_id: Number(selectedRawMaterialId),
-                    required_quantity: Number(requiredQuantity),
-                    unit_id: Number(selectedUnitId)
-                })
-                .select('*, products(name), raw_materials(name), units_of_measure(name, abbreviation)')
-                .single();
-
-            if (error) throw error;
-
-            if (data) {
-                onRecipeAdded(data);
-                toast.success('Ingrediente añadido a la receta exitosamente!');
-                setRequiredQuantity('');
-                setSelectedUnitId('');
-                // Keep product selected for easier multiple entry
-            }
-        } catch (error: any) {
-            toast.error(`Error al crear: ${error.message}`);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    return (
-        <div className="add-product-form">
-            <h3>Añadir Ingrediente a Receta</h3>
-            <form onSubmit={handleCreateRecipe}>
-                <select
-                    value={selectedProductId}
-                    onChange={(e) => setSelectedProductId(Number(e.target.value))}
-                    className="form-select"
-                >
-                    <option value="">Seleccionar Producto</option>
-                    {products.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                </select>
-
-                <select
-                    value={selectedRawMaterialId}
-                    onChange={(e) => setSelectedRawMaterialId(Number(e.target.value))}
-                    className="form-select"
-                >
-                    <option value="">Seleccionar Ingrediente</option>
-                    {rawMaterials.map(rm => (
-                        <option key={rm.id} value={rm.id}>{rm.name} ({rm.units_of_measure?.name} {rm.units_of_measure?.abbreviation ? `(${rm.units_of_measure.abbreviation})` : ''})</option>
-                    ))}
-                </select>
-
-                <input
-                    type="number"
-                    placeholder="Cantidad Requerida"
-                    value={requiredQuantity}
-                    onChange={(e) => setRequiredQuantity(parseFloat(e.target.value))}
-                    step="0.01"
-                />
-
-                <select
-                    value={selectedUnitId}
-                    onChange={(e) => setSelectedUnitId(Number(e.target.value))}
-                    className="form-select"
-                >
-                    <option value="">Seleccionar Unidad</option>
-                    {units.map(u => (
-                        <option key={u.id} value={u.id}>{u.name} {u.abbreviation ? `(${u.abbreviation})` : ''}</option>
-                    ))}
-                </select>
-
-                <button type="submit" className="button" disabled={isSubmitting}>
-                    {isSubmitting ? 'Añadiendo...' : 'Añadir'}
-                </button>
-            </form>
-        </div>
-    );
+  return (
+    <div className="add-product-form">
+      <h3>Añadir Ingrediente a Receta</h3>
+      <form onSubmit={handleCreateRecipe}>
+        <select value={selectedProductId} onChange={(e) => setSelectedProductId(e.target.value)} className="form-select">
+          <option value="">Seleccionar Producto</option>
+          {products.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
+        </select>
+        <select value={selectedRawMaterialId} onChange={(e) => setSelectedRawMaterialId(e.target.value)} className="form-select">
+          <option value="">Seleccionar Ingrediente</option>
+          {rawMaterials.map(rm => (
+            <option key={rm._id} value={rm._id}>
+              {rm.name} {rm.unit ? `(${rm.unit.abbreviation})` : ''}
+            </option>
+          ))}
+        </select>
+        <input type="number" placeholder="Cantidad Requerida" value={requiredQuantity}
+          onChange={(e) => setRequiredQuantity(parseFloat(e.target.value))} step="0.01" />
+        <select value={selectedUnitId} onChange={(e) => setSelectedUnitId(e.target.value)} className="form-select">
+          <option value="">Seleccionar Unidad</option>
+          {units.map(u => <option key={u._id} value={u._id}>{u.name} {u.abbreviation ? `(${u.abbreviation})` : ''}</option>)}
+        </select>
+        <button type="submit" className="button" disabled={isSubmitting}>
+          {isSubmitting ? 'Añadiendo...' : 'Añadir'}
+        </button>
+      </form>
+    </div>
+  );
 };
 
 export default AddRecipeForm;
-
-
-

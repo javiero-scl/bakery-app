@@ -1,7 +1,7 @@
 import './App.css';
 import { useEffect, useState } from 'react';
-import { supabase } from './lib/supabaseClient';
-import { Session } from '@supabase/supabase-js';
+import { account } from './lib/appwriteClient';
+import { Models } from 'appwrite';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Products from './pages/Products';
@@ -18,23 +18,14 @@ import { Toaster } from 'react-hot-toast';
 import Login from './pages/Login';
 
 function App() {
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    account.get()
+      .then((u) => setUser(u))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -45,15 +36,14 @@ function App() {
     <BrowserRouter>
       <Toaster position="top-center" reverseOrder={false} />
       <Routes>
-        <Route path="/login" element={!session ? <Login /> : <Navigate to="/products" />} />
+        <Route path="/login" element={!user ? <Login onLogin={setUser} /> : <Navigate to="/products" />} />
 
-        <Route element={session ? <Layout /> : <Navigate to="/login" />}>
+        <Route element={user ? <Layout onLogout={() => setUser(null)} /> : <Navigate to="/login" />}>
           <Route path="/" element={<Navigate to="/products" replace />} />
           <Route path="/products" element={<Products />} />
           <Route path="/raw-materials" element={<RawMaterials />} />
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/units" element={<Units />} />
-          {/* Placeholder routes for now */}
           <Route path="/productions" element={<Productions />} />
           <Route path="/purchases" element={<Purchases />} />
           <Route path="/sales" element={<Sales />} />
@@ -67,5 +57,3 @@ function App() {
 }
 
 export default App;
-
-
